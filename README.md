@@ -1,4 +1,4 @@
-# VPNHop
+# VPNChain
 
 ## About
 Multi-Hop VPN Setup Script for AWS.
