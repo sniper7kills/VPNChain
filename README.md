@@ -21,12 +21,12 @@ Private Internet Access
     shutdown -r now
 
 ## Adding Providers
-1) Create new `/providers/PROVIDER` file
+1. Create new `providers/PROVIDER` file
 
-1a) The first line should be the relitive location of your .ovpn file (base/PROVIDER/PROVIDER.ovpn)
+....The first line should be the relitive location of your .ovpn file (base/PROVIDER/PROVIDER.ovpn)
 
-1b) The rest of the file should contain `SERVER,PORT` infromation for that providers servers (at least the ones you want to use)
-    
-2) Copy any needed files to `base/PROVIDER`
+....The rest of the file should contain `SERVER,PORT` infromation for that providers servers (at least the ones you want to use)
 
-3) Edit `PROVIDER.ovpn` to put any file paths to `base/PROVIDER/FILE`
+1. Copy `PROVIDER.ovpn` to `base/PROVIDER/PROVIDER.ovpn`
+1. Copy any needed files to `base/PROVIDER` - I.E. (ca.crt, clr.pem, auth.txt)
+1. Edit `PROVIDER.ovpn` to put any file paths to `base/PROVIDER/FILE`
