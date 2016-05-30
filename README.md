@@ -22,11 +22,8 @@ Private Internet Access
 
 ## Adding Providers
 1. Create new `providers/PROVIDER` file
-
-....The first line should be the relitive location of your .ovpn file (base/PROVIDER/PROVIDER.ovpn)
-
-....The rest of the file should contain `SERVER,PORT` infromation for that providers servers (at least the ones you want to use)
-
+.1.The first line should be the relitive location of your .ovpn file (base/PROVIDER/PROVIDER.ovpn)
+.1.The rest of the file should contain `SERVER,PORT` infromation for that providers servers (at least the ones you want to use)
 1. Copy `PROVIDER.ovpn` to `base/PROVIDER/PROVIDER.ovpn`
 1. Copy any needed files to `base/PROVIDER` - I.E. (ca.crt, clr.pem, auth.txt)
 1. Edit `PROVIDER.ovpn` to put any file paths to `base/PROVIDER/FILE`
