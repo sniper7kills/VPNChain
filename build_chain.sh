@@ -231,14 +231,14 @@ kill -9 `cat vpn2.pid`
 kill -9 `cat vpn1.pid`
 kill -9 `cat vpn0.pid`
 
-sleep 5
+killall -9 openvpn
 ###
 #
 # Ensure Old Routes Get clean
 #
 ###
 echo "# Ensuring that all old routes have been removed"
-
+/sbin/ip route del `cat .vpn0.public`
 /sbin/ip route del `cat .vpn1.public`
 /sbin/ip route del `cat .vpn2.public`
 
@@ -257,6 +257,9 @@ rm .vpn1.public
 rm .vpn2.public
 rm vpn1.ovpn
 rm vpn2.ovpn
+rm vpn0.pid
+rm vpn1.pid
+rm vpn2.pid
 
 ###
 #
@@ -264,19 +267,29 @@ rm vpn2.ovpn
 #
 ###
 FirstHop
-VPN0_LOCAL=$(ip -o -4 addr show dev tun0 | awk -F '[ /]+' '/global/ {print $4}')
-COUNT=0
-while ! valid_ip $VPN0_LOCAL
+SFH=false
+while ! $SFH
 do
 	VPN0_LOCAL=$(ip -o -4 addr show dev tun0 | awk -F '[ /]+' '/global/ {print $4}')
-	sleep $((COUNT++))
-	if [ $COUNT -gt 5 ]
+	COUNT=0
+	while ! valid_ip $VPN0_LOCAL
+	do
+		VPN0_LOCAL=$(ip -o -4 addr show dev tun0 | awk -F '[ /]+' '/global/ {print $4}')
+		sleep $((COUNT++))
+		if [ $COUNT -gt 5 ]
+		then
+			echo "ERROR CONNECTING TO VPN RESETTING"
+			/sbin/ip route del `cat .vpn0.public` via $LOCAL_GATEW dev eth0
+			kill -9 `cat vpn0.pid` 
+			FirstHop
+			COUNT=0
+		fi
+	done
+	sleep 5
+	VPN0_LOCAL=$(ip -o -4 addr show dev tun0 | awk -F '[ /]+' '/global/ {print $4}')
+	if valid_ip $VPN0_LOCAL 
 	then
-		echo "ERROR CONNECTING TO VPN RESETTING"
-		/sbin/ip route del `cat .vpn0.public`
-		kill -9 `cat vpn0.pid`  via $LOCAL_GATEW dev eth0
-		FirstHop
-		COUNT=0
+		SFH=true
 	fi
 done
 echo "### Public IP: $VPN0_IP"
@@ -297,19 +310,29 @@ echo "### Local IP: $VPN0_LOCAL"
 #
 ###
 SecondHop
-VPN1_LOCAL=$(ip -o -4 addr show dev tun1 | awk -F '[ /]+' '/global/ {print $4}')
-COUNT=0
-while ! valid_ip $VPN1_LOCAL
+SSH=false
+while ! $SSH
 do
 	VPN1_LOCAL=$(ip -o -4 addr show dev tun1 | awk -F '[ /]+' '/global/ {print $4}')
-	sleep $((COUNT++))
-	if [ $COUNT -gt 5 ]
+	COUNT=0
+	while ! valid_ip $VPN1_LOCAL
+	do
+		VPN1_LOCAL=$(ip -o -4 addr show dev tun1 | awk -F '[ /]+' '/global/ {print $4}')
+		sleep $((COUNT++))
+		if [ $COUNT -gt 5 ]
+		then
+			echo "ERROR CONNECTING TO VPN RESETTING"
+			/sbin/ip route del `cat .vpn1.public`  via $VPN0_LOCAL dev tun0
+			kill -9 `cat vpn1.pid`
+			SecondHop
+			COUNT=0
+		fi
+	done
+	sleep 5
+	VPN1_LOCAL=$(ip -o -4 addr show dev tun1 | awk -F '[ /]+' '/global/ {print $4}')
+	if valid_ip $VPN1_LOCAL
 	then
-		echo "ERROR CONNECTING TO VPN RESETTING"
-		/sbin/ip route del `cat .vpn1.public`  via $VPN0_LOCAL dev tun0
-		kill -9 `cat vpn1.pid`
-		SecondHop
-		COUNT=0
+		SSH=true
 	fi
 done
 echo "### Public IP: $VPN1_IP"
@@ -330,19 +353,29 @@ echo "### Local IP: $VPN1_LOCAL"
 #
 ###
 ThirdHop
-VPN2_LOCAL=$(ip -o -4 addr show dev tun2 | awk -F '[ /]+' '/global/ {print $4}')
-COUNT=0
-while ! valid_ip $VPN2_LOCAL
+STH=false
+while ! $STH
 do
 	VPN2_LOCAL=$(ip -o -4 addr show dev tun2 | awk -F '[ /]+' '/global/ {print $4}')
-	sleep $((COUNT++))
-	if [ $COUNT -gt 5 ]
+	COUNT=0
+	while ! valid_ip $VPN2_LOCAL
+	do
+		VPN2_LOCAL=$(ip -o -4 addr show dev tun2 | awk -F '[ /]+' '/global/ {print $4}')
+		sleep $((COUNT++))
+		if [ $COUNT -gt 5 ]
+		then
+			echo "ERROR CONNECTING TO VPN RESETTING"
+			/sbin/ip route del `cat .vpn2.public` via $VPN1_LOCAL dev tun1
+			kill -9 `cat vpn2.pid`
+			SecondHop
+			COUNT=0
+		fi
+	done
+	sleep 5
+	VPN2_LOCAL=$(ip -o -4 addr show dev tun2 | awk -F '[ /]+' '/global/ {print $4}')
+	if valid_ip $VPN2_LOCAL
 	then
-		echo "ERROR CONNECTING TO VPN RESETTING"
-		/sbin/ip route del `cat .vpn2.public`  via $VPN1_LOCAL dev tun1
-		kill -9 `cat vpn2.pid`
-		SecondHop
-		COUNT=0
+		STH=true
 	fi
 done
 echo "### Public IP: $VPN2_IP"
