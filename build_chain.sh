@@ -58,7 +58,7 @@ function FirstHop()
 	/sbin/ip route add $VPN0_IP via $ETH0_GATEW dev eth0
 	
 	echo "## Connecting to VPN"
-	/usr/sbin/openvpn vpn0.ovpn >> logs/vpn0.log &
+	/usr/sbin/openvpn vpn0.ovpn > logs/vpn0.log &
 	echo $! > vpn0.pid
 }
 
@@ -99,7 +99,7 @@ function SecondHop()
 	/sbin/ip route add $VPN1_IP via $VPN0_LOCAL dev tun0
 	
 	echo "## Connecting to VPN"
-	/usr/sbin/openvpn vpn1.ovpn >> logs/vpn1.log &
+	/usr/sbin/openvpn vpn1.ovpn > logs/vpn1.log &
 	echo $! > vpn1.pid
 }
 	
@@ -140,7 +140,7 @@ function ThirdHop()
 	/sbin/ip route add $VPN2_IP via $VPN1_LOCAL dev tun1
 	
 	echo "## Connecting to VPN"
-	/usr/sbin/openvpn vpn2.ovpn >> logs/vpn2.log &
+	/usr/sbin/openvpn vpn2.ovpn > logs/vpn2.log &
 	echo $! > vpn2.pid
 }
 
